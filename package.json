@@ -1,14 +1,18 @@
 {
-  "name": "internalizer",
+  "name": "bolivar",
   "version": "0.0.0",
-  "description": "Resolve external CSS, JS and IMG dependencies",
+  "description": "Get independant from external css, js and images",
   "main": "cli.js",
+  "bin": {
+    "bolivar": "cli.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Finn Pauls",
   "license": "MIT",
   "dependencies": {
-    "cheerio": "~0.15.0"
+    "cheerio": "~0.15.0",
+    "findit": "~1.1.1"
   }
 }

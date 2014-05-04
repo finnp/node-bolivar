@@ -1,50 +1,30 @@
+#!/usr/bin/env node
+
+var findit = require('findit');
 var fs = require('fs');
-var http = require('http');
-var cheerio = require('cheerio');
+var path = require('path');
 
-var testFile = fs.readFileSync('example.html');
+var resolveExternals = require('./index.js').resolveExternals;
 
-var $ = cheerio.load(testFile.toString());
-
-var isExternal = function(path) {
-  return path && path.indexOf('//') > -1;
-};
-
-var completeUrl = function(url) {
-  // Assuming it is an URL not a local path
-  if(url[0] == '/') return 'http:' + url;
-  return url;
-};
-
-var paths = {
-  css: 'css',
-  js: 'js'
-}
+var root = process.cwd();
+console.log('Root directory: ' + root);
+var finder = findit(root);
+// resolveExternals(root, 'example2.html');
 
 
-var resolve = function(type, url) {
-  if(isExternal(url)) {
-    url = completeUrl(url);
-    var fileName = url.split('/').pop();
-    console.log('Replacing \n * ' + url);
-    var intFile = fs.createWriteStream(paths[type] + '/' + fileName);
-    http.get(url, function(extFile) {
-      extFile.pipe(intFile)
-    });
-    return 'href', '/' + paths[type] + '/' + fileName;
-  } else {
-    return url;
-  }
-  
-};
-
-$('link[rel=stylesheet]').each(function(i, elem) {
-  var url = $(this).attr('href');
-  localPath = resolve('css', url);
-  $(this).attr('href', localPath);
+finder.on('directory', function (dir, stat, stop) {
+    var base = path.basename(dir);
+    if (base === '.git' || base === 'node_modules') stop()
 });
 
-$('script').each(function(i, elem) {
-  var url = $(this).attr('src');
-  resolve('js', url);
+
+finder.on('file', function (file, stat) {
+    var ending = path.extname(file);
+    var relFile = file.slice(root.length + 1, file.length);
+    if(ending === '.html') {
+      console.log('File: ' + relFile);
+      resolveExternals(root, relFile);
+    }
 });
+
+
