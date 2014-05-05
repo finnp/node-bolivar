@@ -18,6 +18,7 @@
   "keywords": "resolve, external files, offline development",
   "dependencies": {
     "cheerio": "~0.15.0",
-    "findit": "~1.1.1"
+    "findit": "~1.1.1",
+    "nomnom": "~1.6.2"
   }
 }

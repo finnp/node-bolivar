@@ -1,78 +1,83 @@
 var fs = require('fs');
 var http = require('http');
 var path = require('path');
+var util = require('util');
+var EventEmitter = require('events').EventEmitter;
 var cheerio = require('cheerio');
 var findit = require('findit');
 
-var bolivar = function(options) {
-
-  var print = function(text) {
-    if(!options.silent) {
-      console.log(text);
-    }
-  };
-
-  print('Root directory: ' + options.root);
-
-  var resolveExternals = function(root, relFile) {
-    var filepath = path.join(root, relFile);
-    var file = fs.readFileSync(filepath);
-    var $ = cheerio.load(file.toString());
-
-    var saveLocally = function(selector, attrName, type) {
-      $(selector).each(function(i, elem) {
-        var url = $(this).attr(attrName);
-        localPath = resolve(type, url);
-        $(this).attr(attrName, localPath);
-      });
-    };
-
-    saveLocally('link[rel=stylesheet]', 'href', 'css');
-    saveLocally('script', 'src', 'js');
-    saveLocally('img', 'src', 'img');
-    fs.writeFileSync(filepath, $.html());
-  };
-
-  var isExternal = function(path) {
+// Helper
+var isExternal = function(path) {
     return path && path.indexOf('//') > -1;
-  };
+};
 
-  var completeUrl = function(url) {
-    // Assuming it is an URL not a local path
-    if(url[0] == '/') return 'http:' + url;
-    return url;
-  };
+var completeUrl = function(url) {
+  // Assuming it is an URL not a local path
+  if(url[0] == '/') return 'http:' + url;
+  return url;
+};
 
-  var resolve = function(type, url) {
-    if(isExternal(url)) {
-      url = completeUrl(url);
-      var filename = url.split('/').pop();
-      print('* ' + url);
-      var intFile = fs.createWriteStream(path.join(options.paths[type], filename));
-      http.get(url, function(extFile) {
-        extFile.pipe(intFile)
-      });
-      return path.join('/', options.paths[type], filename);
-    } else {
-      return url;
-    }  
-  };
+util.inherits(Bolivar, EventEmitter);
+
+function Bolivar(options) {
+  if(!(this instanceof Bolivar)) return new Bolivar(options);
+  EventEmitter.call(this);
+  this.options = options;
+  var self = this;
+
+  this.emit('test');
 
   var finder = findit(options.root);
 
   finder.on('directory', function (dir, stat, stop) {
       var base = path.basename(dir);
-      if (base === '.git' || base === 'node_modules') stop()
+      if (base === '.git' || base === 'node_modules') stop();
   });
 
   finder.on('file', function (file, stat) {
-      var relFile = path.relative(options.root, file);
+      var relFile = path.relative(self.options.root, file);
       if(path.extname(file) === '.html') {
-        print('File: ' + relFile);
-        resolveExternals(options.root, relFile);
+        self.emit('file', {name: relFile});
+        self.freeFile(self.options.root, relFile);
       }
   }); 
+}
+
+Bolivar.prototype.freeFile = function(root, relFile) {
+  var self = this;
+  var filepath = path.join(root, relFile);
+  var file = fs.readFileSync(filepath);
+  var $ = cheerio.load(file.toString());
+
+  var saveLocally = function(selector, attrName, type) {
+    $(selector).each(function(i, elem) {
+      var url = $(this).attr(attrName);
+      localPath = self.downloadLocally(type, url);
+      $(this).attr(attrName, localPath);
+    });
+  };
+
+  saveLocally('link[rel=stylesheet]', 'href', 'css');
+  saveLocally('script', 'src', 'js');
+  saveLocally('img', 'src', 'img');
+  fs.writeFileSync(filepath, $.html());
 };
 
-module.exports = bolivar;
 
+Bolivar.prototype.downloadLocally = function(type, url) {
+  if(isExternal(url)) {
+    url = completeUrl(url);
+    var filename = url.split('/').pop();
+    this.emit('url', {url: url});
+    var savePath = this.options.paths[type];
+    var intFile = fs.createWriteStream(path.join(savePath, filename));
+    http.get(url, function(extFile) {
+      extFile.pipe(intFile)
+    });
+    return path.join('/', savePath, filename);
+  } else {
+    return url;
+  }  
+};
+
+module.exports = Bolivar;

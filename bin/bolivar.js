@@ -4,20 +4,39 @@ var findit = require('findit');
 var fs = require('fs');
 var path = require('path');
 
-var bolivar = require('../index.js');
+var Bolivar = require('../index.js');
 
-var options = {};
-options.root = process.cwd();
-options.silent = false;
+var options = require('nomnom')
+  .option('root', {
+    abbr: 'r',
+    default: process.cwd(),
+    help: 'The root directory to work on'
+  })
+  .option('silent', {
+    abbr: 's',
+    flag: true,
+    help: 'When set no messages will be printed'
+  })
+  .parse()
+  ;
+
+// To be included in CLI
 options.paths = {
   css: 'css',
   js: 'js',
   img: 'img'
 }
 
-if(!fs.existsSync(path.join(options.root, '.git'))) {
-  console.log('No .git folder found. Are you sure you want to use this here?');
-  process.exit()
-}
+var bolivar = new Bolivar(options);
 
-bolivar(options);
+if(!options.silent) {
+  console.log('Root ' + options.root);
+
+  bolivar.on('file', function(data) {
+    console.log('File: ' + data.name);
+  });
+
+  bolivar.on('url', function(data) {
+    console.log('* ' + data.url);
+  });
+}
