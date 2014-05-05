@@ -7,6 +7,8 @@ var path = require('path');
 var Bolivar = require('../index.js');
 
 var options = require('nomnom')
+  .script('bolivar')
+  .help('Get independant from external css, js and images')
   .option('root', {
     abbr: 'r',
     default: process.cwd(),
@@ -21,11 +23,7 @@ var options = require('nomnom')
   ;
 
 // To be included in CLI
-options.paths = {
-  css: 'css',
-  js: 'js',
-  img: 'img'
-}
+options.paths = false;
 
 var bolivar = new Bolivar(options);
 

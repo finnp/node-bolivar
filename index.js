@@ -22,6 +22,13 @@ util.inherits(Bolivar, EventEmitter);
 function Bolivar(options) {
   if(!(this instanceof Bolivar)) return new Bolivar(options);
   EventEmitter.call(this);
+
+  // Default paths
+  if(!options.paths) options.paths = {};
+  if(!options.paths.css) options.paths.css = 'css';
+  if(!options.paths.js) options.paths.js = 'js';
+  if(!options.paths.img) options.paths.img = 'img';
+
   this.options = options;
   var self = this;
 
