@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-var findit = require('findit');
 var fs = require('fs');
 var path = require('path');
+var findit = require('findit');
 
 var Bolivar = require('../index.js');
 
@@ -19,11 +19,17 @@ var options = require('nomnom')
     flag: true,
     help: 'When set no messages will be printed'
   })
+  .option('force', {
+    abbr: 'f',
+    flag: true,
+    help: 'Run bolivar without aborting on warnings'
+  })
   .parse()
   ;
 
 // To be included in CLI
 options.paths = false;
+
 
 var bolivar = new Bolivar(options);
 
@@ -38,3 +44,10 @@ if(!options.silent) {
     console.log('* ' + data.url);
   });
 }
+
+if(!options.force && !fs.existsSync(path.join(options.root, '.git'))) {
+  console.error('No .git found in root. Use -f if you are sure what you are doing.');
+  process.exit();
+}
+
+bolivar.start();

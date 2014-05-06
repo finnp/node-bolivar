@@ -30,25 +30,29 @@ function Bolivar(options) {
   if(!options.paths.img) options.paths.img = 'img';
 
   this.options = options;
+}
+
+Bolivar.prototype.start = function() {
   var self = this;
+  self.finder = findit(self.options.root);
 
-  this.emit('test');
-
-  var finder = findit(options.root);
-
-  finder.on('directory', function (dir, stat, stop) {
+  self.finder.on('directory', function (dir, stat, stop) {
       var base = path.basename(dir);
       if (base === '.git' || base === 'node_modules') stop();
   });
 
-  finder.on('file', function (file, stat) {
+  self.finder.on('file', function (file, stat) {
       var relFile = path.relative(self.options.root, file);
       if(path.extname(file) === '.html') {
         self.emit('file', {name: relFile});
         self.freeFile(self.options.root, relFile);
       }
   }); 
-}
+};
+
+Bolivar.prototype.stop = function() {
+  this.finder.stop();
+};
 
 Bolivar.prototype.freeFile = function(root, relFile) {
   var self = this;

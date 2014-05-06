@@ -15,7 +15,7 @@
   },
   "author": "Finn Pauls",
   "license": "MIT",
-  "keywords": "independant, external files, offline development, resolve dependencies",
+  "keywords": "cli, independant, external files, offline development, resolve dependencies",
   "dependencies": {
     "cheerio": "~0.15.0",
     "findit": "~1.1.1",
