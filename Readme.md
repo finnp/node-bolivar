@@ -8,6 +8,20 @@ Just install it with `npm install -g bolivar` and use `bolivar` in your projects
 
 Make sure the project is GIT version controlled in case Bolivar screws something up. Bolivar will skip the `.git` and `node_modules` directories.
 
+## Command Line usage
+```
+$ bolivar -h
+Usage: bolivar [options]
+
+Options:
+   -r, --root     The root directory to work on  [/Users/finn/code/node/npm/bolivar]
+   -s, --silent   When set no messages will be printed
+   -f, --force    Run bolivar without aborting on warnings
+
+Get independant from external css, js and images
+```
+
+
 ## Script usage
 You can also use bolivar via require. It will not `console.log` messages but emit `file` and `url` events.
 ```javascript
