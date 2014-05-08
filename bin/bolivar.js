@@ -24,11 +24,36 @@ var options = require('nomnom')
     flag: true,
     help: 'Run bolivar without aborting on warnings'
   })
+  .option('parent', {
+    abbr: 'p',
+    default: '',
+    help: 'Parent directory of the assets'
+  })
+  .option('child', {
+    abbr: 'c',
+    default: '',
+    help: 'Child directory of the assets'
+  })
+  .option('css', {
+    default: 'css',
+    help: 'The directory name for .css files'
+  })
+  .option('js', {
+    default: 'js',
+    help: 'The directory name for .js files'
+  })
+  .option('img', {
+    default: 'img',
+    help: 'The directory name for image files'
+  })
   .parse()
   ;
 
-// To be included in CLI
-options.paths = false;
+options.paths = {
+    css: path.join(options.parent, options.css, options.child),
+    js: path.join(options.parent, options.js, options.child),
+    img: path.join(options.parent, options.img, options.child)
+};
 
 
 var bolivar = new Bolivar(options);
