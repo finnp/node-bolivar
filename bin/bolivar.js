@@ -6,9 +6,11 @@ var findit = require('findit');
 
 var Bolivar = require('../index.js');
 
-var options = require('nomnom')
+var parser = require('nomnom')
   .script('bolivar')
-  .help('Get independant from external css, js and images')
+  .help('Get independant from external css, js and images');
+
+parser.command('start')
   .option('root', {
     abbr: 'r',
     default: process.cwd(),
@@ -46,33 +48,41 @@ var options = require('nomnom')
     default: 'img',
     help: 'The directory name for image files'
   })
-  .parse()
+  .help('Start the replacing')
+  .callback(function(options) {
+    startBolivar(options);
+  })
   ;
 
-options.paths = {
-    css: path.join(options.parent, options.css, options.child),
-    js: path.join(options.parent, options.js, options.child),
-    img: path.join(options.parent, options.img, options.child)
-};
+parser.parse();
+
+function startBolivar(options) {
+  options.paths = {
+      css: path.join(options.parent, options.css, options.child),
+      js: path.join(options.parent, options.js, options.child),
+      img: path.join(options.parent, options.img, options.child)
+  };
 
 
-var bolivar = new Bolivar(options);
+  var bolivar = new Bolivar(options);
 
-if(!options.silent) {
-  console.log('Root ' + options.root);
+  if(!options.silent) {
+    console.log('Root ' + options.root);
 
-  bolivar.on('file', function(data) {
-    console.log('File: ' + data.name);
-  });
+    bolivar.on('file', function(data) {
+      console.log('File: ' + data.name);
+    });
 
-  bolivar.on('url', function(data) {
-    console.log('* ' + data.url);
-  });
+    bolivar.on('url', function(data) {
+      console.log('* ' + data.url);
+    });
+  }
+
+  if(!options.force && !fs.existsSync(path.join(options.root, '.git'))) {
+    console.error('No .git found in root. Use -f if you are sure what you are doing.');
+    process.exit();
+  }
+
+  bolivar.start();  
 }
 
-if(!options.force && !fs.existsSync(path.join(options.root, '.git'))) {
-  console.error('No .git found in root. Use -f if you are sure what you are doing.');
-  process.exit();
-}
-
-bolivar.start();

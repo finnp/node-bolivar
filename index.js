@@ -47,7 +47,7 @@ Bolivar.prototype.start = function() {
         self.emit('file', {name: relFile});
         self.freeFile(self.options.root, relFile);
       }
-  }); 
+  });
 };
 
 Bolivar.prototype.stop = function() {
@@ -83,12 +83,12 @@ Bolivar.prototype.downloadLocally = function(type, url) {
     var savePath = this.options.paths[type];
     var intFile = fs.createWriteStream(path.join(savePath, filename));
     http.get(url, function(extFile) {
-      extFile.pipe(intFile)
+      extFile.pipe(intFile);
     });
     return path.join('/', savePath, filename);
   } else {
     return url;
-  }  
+  }
 };
 
 module.exports = Bolivar;
