@@ -2,23 +2,32 @@
 
 > Get independant from external css, js and images
 
-Bolivar is a CLI for removing external CSS, JS and image dependencies from your projects, moving them into `css`, `js` and `img` folders. It's convenient if you used a lot of CDNs and external images and now want to work offline on your HTML.
+Bolivar is a CLI for removing external CSS, JS and image dependencies from your
+projects, moving them into `css`, `js` and `img` folders. It's convenient if you
+used a lot of CDNs and external images and now want to work offline on your HTML.
 
-Just install it with `npm install -g bolivar` and use `bolivar` in your projects root.
+Just install it with `npm install -g bolivar` and use `bolivar start` in your
+projects root.
 
-Make sure the project is GIT version controlled in case Bolivar screws something up. Bolivar will skip the `.git` and `node_modules` directories.
+Make sure the project is GIT version controlled in case Bolivar screws something
+up. Bolivar will skip the `.git` and `node_modules` directories.
 
 ## Command Line usage
 ```
-$ bolivar -h
-Usage: bolivar [options]
+$ bolivar start -h
+Usage: bolivar start [options]
 
 Options:
    -r, --root     The root directory to work on  [/Users/finn/code/node/npm/bolivar]
    -s, --silent   When set no messages will be printed
    -f, --force    Run bolivar without aborting on warnings
+   -p, --parent   Parent directory of the assets  []
+   -c, --child    Child directory of the assets  []
+   --css          The directory name for .css files  [css]
+   --js           The directory name for .js files  [js]
+   --img          The directory name for image files  [img]
 
-Get independant from external css, js and images
+Start the replacing
 ```
 
 
