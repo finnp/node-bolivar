@@ -50,19 +50,18 @@ parser.command('start')
   })
   .help('Start the replacing')
   .callback(function(options) {
-    startBolivar(options);
+    start(options);
   })
   ;
 
 parser.parse();
 
-function startBolivar(options) {
+function start(options) {
   options.paths = {
       css: path.join(options.parent, options.css, options.child),
       js: path.join(options.parent, options.js, options.child),
       img: path.join(options.parent, options.img, options.child)
   };
-
 
   var bolivar = new Bolivar(options);
 
@@ -83,6 +82,5 @@ function startBolivar(options) {
     process.exit();
   }
 
-  bolivar.start();  
+  bolivar.start();
 }
-

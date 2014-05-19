@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<head>
+	<!-- ALl the URLs that should match are listed in detect-urls.txt -->
+
+	<!-- Should match -->
+	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.15/angular.min.js"></script>
+	<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+	<script src='//code.jquery.com/jquery-migrate-1.2.1.min.js'></script>
+	<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
+	<link rel="stylesheet" href="http://foo.co.uk/index.css" />
+	<link rel="stylesheet" href="http://www.test.de/index.css" />
+	<link rel="stylesheet" href='//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css'>
+	<link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+	<link href="http://weloveiconfonts.com/api/?family=brandico" rel="stylesheet" type="text/css">
+	<link rel="stylesheet" href="//cdn.jsdelivr.net/16pixels/0.1/16pixels.css">
+	<!-- Should not match -->
+	<script src="angular.min.js"></script>
+	<script src="/3.1.1/js/bootstrap.min.js"></script>
+	<script src='/css/jquery-migrate-1.2.1.min.js'></script>
+	<link rel="stylesheet" href="themes/smoothness/jquery-ui.css" />
+	<link rel="stylesheet" href="index.css" />
+	<link rel="stylesheet" href='bootstrap/3.1.1/css/bootstrap.min.css'>
+</head>
+<body>
+	<!-- Should match -->
+	<div>Yay</div>
+	<img width="598" height="389" src="//farm8.staticflickr.com/7456/14154949784_3399df86ff_n.jpg" class="low-res-photo" hidden="hidden" style="display: none;">
+	<!-- Should not match -->
+	<a href="http://regexr.com/foo.html?q=bar">Amazing website for regex<a>
+</body>

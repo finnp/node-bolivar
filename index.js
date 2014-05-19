@@ -48,6 +48,8 @@ Bolivar.prototype.start = function() {
         self.freeFile(self.options.root, relFile);
       }
   });
+
+  self.finder.on('end', self.emit.bind(self, 'end'));
 };
 
 Bolivar.prototype.stop = function() {
@@ -81,7 +83,7 @@ Bolivar.prototype.downloadLocally = function(type, url) {
     var filename = url.split('/').pop();
     this.emit('url', {url: url});
     var savePath = this.options.paths[type];
-    var intFile = fs.createWriteStream(path.join(savePath, filename));
+    var intFile = fs.createWriteStream(path.join(this.options.root, savePath, filename));
     http.get(url, function(extFile) {
       extFile.pipe(intFile);
     });
