@@ -8,10 +8,10 @@ describe('bolivar', function () {
   var tmp;
 
   before(function () {
+    tmp = os.tmpdir();
     mkdir(tmp + 'css');
     mkdir(tmp + 'js');
     mkdir(tmp + 'img');
-    tmp = os.tmpdir();
   });
 
   it('should detect the correct urls', function (done) {
