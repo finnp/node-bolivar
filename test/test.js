@@ -30,6 +30,7 @@ describe('bolivar', function () {
       // Tempdir
       tmpdir({unsafeCleanup: true}, function (err, tmpPath) {
         if(err) throw err;
+        console.log(tmpPath);
         mkdir(path.join(tmpPath, 'css'));
         mkdir(path.join(tmpPath, 'js'));
         mkdir(path.join(tmpPath, 'img'));
@@ -41,6 +42,7 @@ describe('bolivar', function () {
       nock.disableNetConnect();
     });
 
+    // files: detect.html detect-urls.txt
     it('should detect the correct urls', function (done) {
 
         // mocking urls
@@ -66,6 +68,7 @@ describe('bolivar', function () {
           ;
     });
 
+    // files: replace-ref.html replace.html replace-urls.txt
     it('should replace the urls properly', function (done) {
       mockUrls('replace');
 
@@ -83,6 +86,37 @@ describe('bolivar', function () {
             done(new Error('Wrong content'));
           }
         })
+        .start()
+        ;
+    });
+
+    // file: header.html
+    it('should detect headers properly of files without ending', function (done) {
+      var mocks = [
+        nock('http://fonts.googleapis.com')
+          .get('/css?family=Roboto')
+          .reply(200, 'OK', { 'Content-Type': 'text/css'}),
+        nock('http://test.de')
+          .get('/dadimg')
+          .reply(200, 'OK', { 'Content-Type': 'image/jpeg'})
+      ];
+
+      fs.createReadStream(path.join(__dirname, 'header.html'))
+        .pipe(fs.createWriteStream(path.join(tmp, 'header.html')))
+        ;
+
+      bolivar({root: tmp})
+        .on('end', function () {
+          var missed = mocks.filter(function (url) {
+            return !url.isDone();
+          })
+
+          if (missed.length === 0) {
+            done();
+          } else {
+            done('Missed ' + missed.length + ' urls. One is ' + missed[0].pendingMocks());
+          }
+          })
         .start()
         ;
     });

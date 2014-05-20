@@ -26,17 +26,21 @@ function Bolivar(options) {
   if(!options.paths.fonts) options.paths.fonts = 'fonts';
 
   options.filetypes = {
-    'css': {
-      exts: ['.css']
+    css: {
+      exts: ['.css'],
+      mimes: ['text/css']
     },
-    'js': {
-      exts: ['.js']
+    js: {
+      exts: ['.js'],
+      mimes: ['application/javascript', 'application/ecmascript']
     },
-    'img': {
-      exts: ['.jpg', '.jpeg', '.png', '.gif']
+    img: {
+      exts: ['.jpg', '.jpeg', '.png', '.gif'],
+      mimes: ['image/gif', 'image/jpeg', 'image/png']
     },
-    'fonts': {
-      exts: ['.ttf', '.eot', '.woff', '.svg']
+    fonts: {
+      exts: ['.ttf', '.eot', '.woff', '.svg'],
+      mimes: ['application/x-font-ttf']
     }
   }
 
