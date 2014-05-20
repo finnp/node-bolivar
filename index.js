@@ -1,7 +1,7 @@
 var fs = require('fs');
 var http = require('http');
 var path = require('path');
-var url = require('url');
+var urlParse = require('url').parse;
 var util = require('util');
 var EventEmitter = require('events').EventEmitter;
 var sar = require('search-act-replace');
@@ -55,23 +55,28 @@ Bolivar.prototype.start = function () {
     ;
 
   function matchedUrl(match, file, replace) {
-    var fileUrl = completeUrl(match[0]);
-    var fileExt = path.extname(url.parse(fileUrl).pathname);
-
-    var filetypes = self.options.filetypes;
-    var localLocation = false;
-    for(filetype in filetypes) {
-      var exts = filetypes[filetype].exts;
-      if (exts.indexOf(fileExt) > -1) {
-        localLocation = self.downloadLocally(filetype, fileUrl);
-      }
-    }
-    replace(localLocation);
+    self.downloadLocally(completeUrl(match[0]), replace);
   }
 }
 
-Bolivar.prototype.downloadLocally = function(type, url) {
+Bolivar.prototype.downloadLocally = function(url, replace) {
+  // checks before if it should download
   var self = this;
+  var type;
+  var filetypes = self.options.filetypes;
+  var fileExt = path.extname(urlParse(url).pathname);
+  for(filetype in filetypes) {
+    var exts = filetypes[filetype].exts;
+    if (exts.indexOf(fileExt) > -1) {
+      type = filetype;
+      break;
+    }
+  }
+  if (!type) {
+    replace(false);
+    return;
+  }
+
   url = completeUrl(url);
   var filename = url.split('/').pop();
   var savePath = this.options.paths[type];
@@ -82,13 +87,13 @@ Bolivar.prototype.downloadLocally = function(type, url) {
       extFile
         .pipe(intFile)
         .on('finish', function () {
+          replace(path.join('/', savePath, filename));
           self.emit('downloaded', {url: url});
         })
         ;
     });
-    return path.join('/', savePath, filename);
   } else {
-    return false;
+    replace(false);
   }
 
 };
