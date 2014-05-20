@@ -5,7 +5,5 @@ http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui
 http://foo.co.uk/index.css
 http://www.test.de/index.css
 http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css
-http://fonts.googleapis.com/css?family=Roboto
-http://weloveiconfonts.com/api/?family=brandico
 http://cdn.jsdelivr.net/16pixels/0.1/16pixels.css
 http://farm8.staticflickr.com/7456/14154949784_3399df86ff_n.jpg
