@@ -34,7 +34,6 @@ describe('bolivar', function () {
         mkdir(path.join(tmpPath, 'js'));
         mkdir(path.join(tmpPath, 'img'));
         tmp = tmpPath;
-        console.log(tmp);
         done();
       });
       // no real http calls here
@@ -51,15 +50,7 @@ describe('bolivar', function () {
           ;
 
         bolivar({root: tmp})
-          .on('url', function (data) {
-            console.log('go ' + data.url);
-          })
-          .on('downloaded',function (data) {
-            console.log('Downloaded ' + data.url);
-          })
           .on('end', function () {
-            console.log('end');
-
             var missed = mocks.filter(function (url) {
               return !url.isDone();
             })

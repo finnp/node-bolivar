@@ -2,7 +2,6 @@
 
 var fs = require('fs');
 var path = require('path');
-var findit = require('findit');
 
 var Bolivar = require('../index.js');
 
