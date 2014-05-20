@@ -80,15 +80,16 @@ Bolivar.prototype.downloadLocally = function(url, replace) {
   url = completeUrl(url);
   var filename = url.split('/').pop();
   var savePath = this.options.paths[type];
-  this.emit('url', {url: url});
   if (savePath) {
     var intFile = fs.createWriteStream(path.join(this.options.root, savePath, filename));
+    this.emit('download', {url: url});
     http.get(url, function(extFile) {
       extFile
         .pipe(intFile)
         .on('finish', function () {
-          replace(path.join('/', savePath, filename));
-          self.emit('downloaded', {url: url});
+          var replacePath = path.join('/', savePath, filename);
+          replace(replacePath);
+          self.emit('url', {url: url, path: replacePath});
         })
         ;
     });

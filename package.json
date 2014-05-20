@@ -18,7 +18,8 @@
   "keywords": "cli, independant, external files, offline development, resolve dependencies",
   "dependencies": {
     "nomnom": "~1.6.2",
-    "search-act-replace": "0.1.0"
+    "search-act-replace": "0.1.0",
+    "cli-color": "~0.3.2"
   },
   "devDependencies": {
     "mocha": "~1.18.2",
