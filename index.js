@@ -23,6 +23,7 @@ function Bolivar(options) {
   if(!options.paths.css) options.paths.css = 'css';
   if(!options.paths.js) options.paths.js = 'js';
   if(!options.paths.img) options.paths.img = 'img';
+  if(!options.paths.fonts) options.paths.fonts = 'fonts';
 
   options.filetypes = {
     'css': {
@@ -35,7 +36,7 @@ function Bolivar(options) {
       exts: ['.jpg', '.jpeg', '.png', '.gif']
     },
     'fonts': {
-      exts: ['.ttf']
+      exts: ['.ttf', '.eot', '.woff', '.svg']
     }
   }
 

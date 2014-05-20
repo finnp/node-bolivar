@@ -33,6 +33,7 @@ describe('bolivar', function () {
         mkdir(path.join(tmpPath, 'css'));
         mkdir(path.join(tmpPath, 'js'));
         mkdir(path.join(tmpPath, 'img'));
+        mkdir(path.join(tmpPath, 'fonts'));
         tmp = tmpPath;
         done();
       });

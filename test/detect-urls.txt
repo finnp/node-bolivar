@@ -7,3 +7,7 @@ http://www.test.de/index.css
 http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css
 http://cdn.jsdelivr.net/16pixels/0.1/16pixels.css
 http://farm8.staticflickr.com/7456/14154949784_3399df86ff_n.jpg
+http://weloveiconfonts.com/api/fonts/brandico/brandico.eot
+http://weloveiconfonts.com/api/fonts/brandico/brandico.eot?
+http://weloveiconfonts.com/api/fonts/brandico/brandico.woff
+http://weloveiconfonts.com/api/fonts/brandico/brandico.ttf
