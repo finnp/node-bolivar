@@ -1,0 +1,3 @@
+http://ajax.googleapis.com/ajax/libs/angularjs/1.2.15/angular.min.js
+http://cdn.jsdelivr.net/16pixels/0.1/16pixels.css
+http://farm8.staticflickr.com/7456/14154949784_3399df86ff_n.jpg
