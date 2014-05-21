@@ -52,14 +52,7 @@ describe('bolivar', function () {
           ;
 
         bolivar({root: tmp})
-          .on('url', function (data) {
-            console.log('downloaded' + data.url);
-          })
-          .on('download', function (data) {
-            console.log('download ' + data.url);
-          })
           .on('end', function () {
-            console.log('END');
             var missed = mocks.filter(function (url) {
               return !url.isDone();
             })
@@ -114,16 +107,33 @@ describe('bolivar', function () {
         .pipe(fs.createWriteStream(path.join(tmp, 'header.html')))
         ;
 
+      var urls = [
+        'http://fonts.googleapis.com/css?family=Roboto',
+        'http://test.de/dadimg'
+      ]
+
       bolivar({root: tmp})
+        .on('url', function (data) {
+          var pos;
+          if (pos = urls.indexOf(data.url) > -1) {
+            urls = urls.splice(pos, 1);
+          } else {
+            done(new Error('False hit'));
+          }
+        })
         .on('end', function () {
           var missed = mocks.filter(function (url) {
             return !url.isDone();
           })
 
           if (missed.length === 0) {
-            done();
+            if (urls.length === 0) {
+              done();
+            } else {
+              done(new Error('Miss'));
+            }
           } else {
-            done('Missed ' + missed.length + ' urls. One is ' + missed[0].pendingMocks());
+            done(new Error('Missed ' + missed.length + ' urls. One is ' + missed[0].pendingMocks()));
           }
           })
         .start()

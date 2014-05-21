@@ -62,7 +62,6 @@ Bolivar.prototype.start = function () {
 
 
   function matchedUrl(match, file, replace) {
-    console.log('match ' + match[0]);
     var url = completeUrl(match[0]);
     var filetypes = self.options.filetypes;
     var fileExt = path.extname(urlParse(url).pathname);
@@ -87,10 +86,10 @@ Bolivar.prototype.start = function () {
 
 Bolivar.prototype.mimeDownload = function (url, replace) {
   var self = this;
-  var mimetypes = [];
   var filetypes = self.options.filetypes;
+  var mimetypes = [];
   for(filetype in filetypes) {
-    mimetypes.concat(filetypes[filetype].mimes);
+    mimetypes = mimetypes.concat(filetypes[filetype].mimes);
   }
   getAccepted(url, mimetypes, function (res) {
     if(res) {
@@ -112,6 +111,7 @@ Bolivar.prototype.mimeDownload = function (url, replace) {
 
 Bolivar.prototype.saveLocally = function (url, res, type, replace) {
   // Takes the FileStream and saves it
+  this.emit('download', {url: url});
   var self = this;
   var filename = url.split('/').pop();
   var savePath = this.options.paths[type];
@@ -141,7 +141,6 @@ Bolivar.prototype.extDownload = function(url, type, replace) {
 
   url = completeUrl(url);
 
-  this.emit('download', {url: url});
   http.get(url, function(res) {
     self.saveLocally(url, res, type, replace);
   });
