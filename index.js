@@ -5,6 +5,7 @@ var urlParse = require('url').parse;
 var util = require('util');
 var EventEmitter = require('events').EventEmitter;
 var sar = require('search-act-replace');
+var getAccepted = require('get-accepted');
 
 var completeUrl = function(url) {
   // Assuming it is an URL not a local path
@@ -59,49 +60,93 @@ Bolivar.prototype.start = function () {
     })
     ;
 
+
   function matchedUrl(match, file, replace) {
-    self.downloadLocally(completeUrl(match[0]), replace);
+    console.log('match ' + match[0]);
+    var url = completeUrl(match[0]);
+    var filetypes = self.options.filetypes;
+    var fileExt = path.extname(urlParse(url).pathname);
+
+    if (fileExt) {
+      // by file extension
+      for(filetype in filetypes) {
+        var exts = filetypes[filetype].exts;
+        if (exts.indexOf(fileExt) > -1) {
+          self.extDownload(url, filetype, replace);
+          return;
+        }
+      }
+      replace(false);
+    } else {
+      // by mime type
+      self.mimeDownload(url, replace);
+    }
   }
 }
 
-Bolivar.prototype.downloadLocally = function(url, replace) {
+
+Bolivar.prototype.mimeDownload = function (url, replace) {
+  var self = this;
+  var mimetypes = [];
+  var filetypes = self.options.filetypes;
+  for(filetype in filetypes) {
+    mimetypes.concat(filetypes[filetype].mimes);
+  }
+  getAccepted(url, mimetypes, function (res) {
+    if(res) {
+      var type;
+      var mime = res.headers['content-type'];
+      for(filetype in filetypes) {
+        var mimes = filetypes[filetype].mimes;
+        if (mimes.indexOf(mime) > -1) {
+          type = filetype;
+        }
+      }
+      self.saveLocally(url, res, type, replace);
+    } else {
+      replace(false);
+    }
+  })
+}
+
+
+Bolivar.prototype.saveLocally = function (url, res, type, replace) {
+  // Takes the FileStream and saves it
+  var self = this;
+  var filename = url.split('/').pop();
+  var savePath = this.options.paths[type];
+  var intFile = fs.createWriteStream(path.join(this.options.root, savePath, filename));
+  if (savePath) {
+    res
+      .pipe(intFile)
+      .on('finish', function () {
+        var replacePath = path.join('/', savePath, filename);
+        replace(replacePath);
+        self.emit('url', {url: url, path: replacePath});
+      })
+      ;
+  } else {
+    replace(false);
+  }
+}
+
+Bolivar.prototype.extDownload = function(url, type, replace) {
   // checks before if it should download
   var self = this;
-  var type;
-  var filetypes = self.options.filetypes;
-  var fileExt = path.extname(urlParse(url).pathname);
-  for(filetype in filetypes) {
-    var exts = filetypes[filetype].exts;
-    if (exts.indexOf(fileExt) > -1) {
-      type = filetype;
-      break;
-    }
-  }
+
   if (!type) {
     replace(false);
     return;
   }
 
   url = completeUrl(url);
-  var filename = url.split('/').pop();
-  var savePath = this.options.paths[type];
-  if (savePath) {
-    var intFile = fs.createWriteStream(path.join(this.options.root, savePath, filename));
-    this.emit('download', {url: url});
-    http.get(url, function(extFile) {
-      extFile
-        .pipe(intFile)
-        .on('finish', function () {
-          var replacePath = path.join('/', savePath, filename);
-          replace(replacePath);
-          self.emit('url', {url: url, path: replacePath});
-        })
-        ;
-    });
-  } else {
-    replace(false);
-  }
 
+  this.emit('download', {url: url});
+  http.get(url, function(res) {
+    self.saveLocally(url, res, type, replace);
+  });
 };
+
+
 
 module.exports = Bolivar;

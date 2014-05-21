@@ -30,7 +30,6 @@ describe('bolivar', function () {
       // Tempdir
       tmpdir({unsafeCleanup: true}, function (err, tmpPath) {
         if(err) throw err;
-        console.log(tmpPath);
         mkdir(path.join(tmpPath, 'css'));
         mkdir(path.join(tmpPath, 'js'));
         mkdir(path.join(tmpPath, 'img'));
@@ -53,7 +52,14 @@ describe('bolivar', function () {
           ;
 
         bolivar({root: tmp})
+          .on('url', function (data) {
+            console.log('downloaded' + data.url);
+          })
+          .on('download', function (data) {
+            console.log('download ' + data.url);
+          })
           .on('end', function () {
+            console.log('END');
             var missed = mocks.filter(function (url) {
               return !url.isDone();
             })
@@ -98,7 +104,10 @@ describe('bolivar', function () {
           .reply(200, 'OK', { 'Content-Type': 'text/css'}),
         nock('http://test.de')
           .get('/dadimg')
-          .reply(200, 'OK', { 'Content-Type': 'image/jpeg'})
+          .reply(200, 'OK', { 'Content-Type': 'image/jpeg'}),
+        nock('http://www.google.de')
+          .get('/test')
+          .reply(200, 'OK', { 'Content-Type': 'text/html'})
       ];
 
       fs.createReadStream(path.join(__dirname, 'header.html'))
