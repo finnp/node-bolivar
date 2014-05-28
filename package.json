@@ -20,7 +20,7 @@
     "nomnom": "~1.6.2",
     "search-act-replace": "0.1.0",
     "cli-color": "~0.3.2",
-    "curli": "0.0.1"
+    "get-accepted": "0.0.1"
   },
   "devDependencies": {
     "mocha": "~1.18.2",

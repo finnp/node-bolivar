@@ -33,7 +33,7 @@ function Bolivar(options) {
     },
     js: {
       exts: ['.js'],
-      mimes: ['application/javascript', 'application/ecmascript']
+      mimes: ['application/javascript', 'application/x-javascript', 'application/ecmascript']
     },
     img: {
       exts: ['.jpg', '.jpeg', '.png', '.gif'],
