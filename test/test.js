@@ -30,10 +30,7 @@ describe('bolivar', function () {
       // Tempdir
       tmpdir({unsafeCleanup: true}, function (err, tmpPath) {
         if(err) throw err;
-        mkdir(path.join(tmpPath, 'css'));
-        mkdir(path.join(tmpPath, 'js'));
-        mkdir(path.join(tmpPath, 'img'));
-        mkdir(path.join(tmpPath, 'fonts'));
+        mkdir(path.join(tmpPath, 'css')); // one already exists
         tmp = tmpPath;
         done();
       });

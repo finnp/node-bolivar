@@ -6,6 +6,7 @@ var util = require('util');
 var EventEmitter = require('events').EventEmitter;
 var sar = require('search-act-replace');
 var getAccepted = require('get-accepted');
+var mkdir = require('mkdirp');
 
 var completeUrl = function(url) {
   // Assuming it is an URL not a local path
@@ -114,13 +115,15 @@ Bolivar.prototype.saveLocally = function (url, res, type, replace) {
   this.emit('download', {url: url});
   var self = this;
   var filename = url.split('/').pop();
-  var savePath = this.options.paths[type];
-  var intFile = fs.createWriteStream(path.join(this.options.root, savePath, filename));
-  if (savePath) {
+  var savePathRel = this.options.paths[type];
+  var savePathFull = path.join(this.options.root, savePathRel);
+  mkdir(savePathFull);
+  var intFile = fs.createWriteStream(path.join(savePathFull, filename));
+  if (savePathRel) {
     res
       .pipe(intFile)
       .on('finish', function () {
-        var replacePath = path.join('/', savePath, filename);
+        var replacePath = path.join('/', savePathRel, filename);
         replace(replacePath);
         self.emit('url', {url: url, path: replacePath});
       })
