@@ -1,6 +1,6 @@
 {
   "name": "bolivar",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Get independant from external css, js and images",
   "main": "index.js",
   "bin": {
