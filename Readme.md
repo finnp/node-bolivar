@@ -33,7 +33,7 @@ Start the replacing
 
 ## Script usage
 You can also use bolivar via require. It will not `console.log` messages but emit
-`file` and `url` events as well as an `end` event.
+`file`, `url` and `download` events as well as an `end` event.
 ```javascript
 	var bolivar = require('bolivar');
 	bolivar({root: '/folder')

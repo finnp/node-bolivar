@@ -1,15 +1,12 @@
 var fs = require('fs');
 var http = require('http');
 var path = require('path');
+var urlParse = require('url').parse;
 var util = require('util');
 var EventEmitter = require('events').EventEmitter;
-var cheerio = require('cheerio');
-var findit = require('findit');
-
-// Helper
-var isExternal = function(path) {
-    return path && path.indexOf('//') > -1;
-};
+var sar = require('search-act-replace');
+var getAccepted = require('get-accepted');
+var mkdir = require('mkdirp');
 
 var completeUrl = function(url) {
   // Assuming it is an URL not a local path
@@ -28,69 +25,130 @@ function Bolivar(options) {
   if(!options.paths.css) options.paths.css = 'css';
   if(!options.paths.js) options.paths.js = 'js';
   if(!options.paths.img) options.paths.img = 'img';
+  if(!options.paths.fonts) options.paths.fonts = 'fonts';
+
+  options.filetypes = {
+    css: {
+      exts: ['.css'],
+      mimes: ['text/css']
+    },
+    js: {
+      exts: ['.js'],
+      mimes: ['application/javascript', 'application/x-javascript', 'application/ecmascript']
+    },
+    img: {
+      exts: ['.jpg', '.jpeg', '.png', '.gif'],
+      mimes: ['image/gif', 'image/jpeg', 'image/png']
+    },
+    fonts: {
+      exts: ['.ttf', '.eot', '.woff', '.svg'],
+      mimes: ['application/x-font-ttf']
+    }
+  }
+
+
+  // This Url RegEx probably needs improvement...
+  options.regex = /(https?:)?\/\/([\w\-]\.?)+(\/[\w\.\-]+)+\/?(\?(\w+(=\w+)?(\&\w+(=\w+)?)*)?)?/g;
 
   this.options = options;
 }
 
-Bolivar.prototype.start = function() {
+Bolivar.prototype.start = function () {
   var self = this;
-  self.finder = findit(self.options.root);
+  sar(self.options.root, self.options.regex, matchedUrl)
+    .on('end',function () {
+      self.emit('end');
+    })
+    ;
 
-  self.finder.on('directory', function (dir, stat, stop) {
-      var base = path.basename(dir);
-      if (base === '.git' || base === 'node_modules') stop();
-  });
 
-  self.finder.on('file', function (file, stat) {
-      var relFile = path.relative(self.options.root, file);
-      if(path.extname(file) === '.html') {
-        self.emit('file', {name: relFile});
-        self.freeFile(self.options.root, relFile);
+  function matchedUrl(match, file, replace) {
+    var url = completeUrl(match[0]);
+    var filetypes = self.options.filetypes;
+    var fileExt = path.extname(urlParse(url).pathname);
+
+    if (fileExt) {
+      // by file extension
+      for(filetype in filetypes) {
+        var exts = filetypes[filetype].exts;
+        if (exts.indexOf(fileExt) > -1) {
+          self.extDownload(url, filetype, replace);
+          return;
+        }
       }
-  });
-
-  self.finder.on('end', self.emit.bind(self, 'end'));
-};
-
-Bolivar.prototype.stop = function() {
-  this.finder.stop();
-};
-
-Bolivar.prototype.freeFile = function(root, relFile) {
-  var self = this;
-  var filepath = path.join(root, relFile);
-  var file = fs.readFileSync(filepath);
-  var $ = cheerio.load(file.toString());
-
-  var saveLocally = function(selector, attrName, type) {
-    $(selector).each(function(i, elem) {
-      var url = $(this).attr(attrName);
-      localPath = self.downloadLocally(type, url);
-      $(this).attr(attrName, localPath);
-    });
-  };
-
-  saveLocally('link[rel=stylesheet]', 'href', 'css');
-  saveLocally('script', 'src', 'js');
-  saveLocally('img', 'src', 'img');
-  fs.writeFileSync(filepath, $.html());
-};
-
-
-Bolivar.prototype.downloadLocally = function(type, url) {
-  if(isExternal(url)) {
-    url = completeUrl(url);
-    var filename = url.split('/').pop();
-    this.emit('url', {url: url});
-    var savePath = this.options.paths[type];
-    var intFile = fs.createWriteStream(path.join(this.options.root, savePath, filename));
-    http.get(url, function(extFile) {
-      extFile.pipe(intFile);
-    });
-    return path.join('/', savePath, filename);
-  } else {
-    return url;
+      replace(false);
+    } else {
+      // by mime type
+      self.mimeDownload(url, replace);
+    }
   }
+}
+
+
+Bolivar.prototype.mimeDownload = function (url, replace) {
+  var self = this;
+  var filetypes = self.options.filetypes;
+  var mimetypes = [];
+  for(filetype in filetypes) {
+    mimetypes = mimetypes.concat(filetypes[filetype].mimes);
+  }
+  getAccepted(url, mimetypes, function (res) {
+    if(res) {
+      var type;
+      var mime = res.headers['content-type'];
+      for(filetype in filetypes) {
+        var mimes = filetypes[filetype].mimes;
+        if (mimes.indexOf(mime) > -1) {
+          type = filetype;
+        }
+      }
+      self.saveLocally(url, res, type, replace);
+    } else {
+      replace(false);
+    }
+  })
+}
+
+
+Bolivar.prototype.saveLocally = function (url, res, type, replace) {
+  // Takes the FileStream and saves it
+  this.emit('download', {url: url});
+  var self = this;
+  var filename = url.split('/').pop();
+  var savePathRel = this.options.paths[type];
+  var savePathFull = path.join(this.options.root, savePathRel);
+  mkdir(savePathFull);
+  var intFile = fs.createWriteStream(path.join(savePathFull, filename));
+  if (savePathRel) {
+    res
+      .pipe(intFile)
+      .on('finish', function () {
+        var replacePath = path.join('/', savePathRel, filename);
+        replace(replacePath);
+        self.emit('url', {url: url, path: replacePath});
+      })
+      ;
+  } else {
+    replace(false);
+  }
+}
+
+Bolivar.prototype.extDownload = function(url, type, replace) {
+  // checks before if it should download
+  var self = this;
+
+  if (!type) {
+    replace(false);
+    return;
+  }
+
+  url = completeUrl(url);
+
+  http.get(url, function(res) {
+    self.saveLocally(url, res, type, replace);
+  });
 };
+
+
 
 module.exports = Bolivar;
