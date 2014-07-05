@@ -1,5 +1,5 @@
 # Bolivar
-
+[![Build Status](https://travis-ci.org/finnp/node-bolivar.svg?branch=master)](https://travis-ci.org/finnp/node-bolivar)
 > Get independant from external css, js and images
 
 Bolivar is a CLI for removing external CSS, JS and image dependencies from your
